@@ -1,0 +1,215 @@
+<!--
+Strike by Appiphony
+
+Version: 1.0.0
+Website: http://www.lightningstrike.io
+GitHub: https://github.com/appiphony/Strike-Components
+License: BSD 3-Clause License
+-->
+<aura:component controller="attendees_lookupController" access="global">
+    <!-- Event Param -->
+    <aura:attribute name="eventId" type="String" required="true" description="Parent Event Id"/>
+
+    <!-- Standard LEX Icons -->
+    <aura:attribute name="iconUser" type="String" default="standard:user" description="String value that determines the icon name or path" access="private"/>
+    <aura:attribute name="iconContact" type="String" default="standard:contact" description="String value that determines the icon name or path" access="private"/>
+    <aura:attribute name="iconLead" type="String" default="standard:lead" description="String value that determines the icon name or path" access="private"/>
+    <aura:attribute name="iconCheckmark" type="String" default="utility:check" description="String value that determines the icon name or path" access="private"/>
+    <aura:attribute name="iconCross" type="String" default="utility:close" description="String value that determines the icon name or path" access="private"/>
+    <aura:attribute name="iconQuestion" type="String" default="utility:question_mark" description="String value that determines the icon name or path" access="private"/>
+
+    <!-- Component State -->
+    <aura:attribute name="componentReadOnly" type="Boolean" default="false" description="Determines whether the component is read only" access="private"/>
+    <aura:attribute name="componentHasChanges" type="Boolean" default="false" description="Determines whether the component has changes that can be saved" access="private"/>
+    <aura:attribute name="disabled" type="Boolean" description="Determines whether the input is disabled"/>
+    <aura:attribute name="required" type="Boolean" description="Determines whether a '*' is displayed on the component"/>
+    <aura:attribute name="error" type="Boolean" description="Determines whether the input is in an error state"/>
+
+    <!-- Search Params -->
+    <aura:attribute name="searchInLeads" type="Boolean" default="{!true}" description="Determines whether search should be performed in Leads"/>
+    <aura:attribute name="searchInContacts" type="Boolean" default="{!true}" description="Determines whether search should be performed in Contacts"/>
+    
+    <!-- Labels -->
+    <aura:attribute name="label" type="String" required="true" description="String value displayed above the menu used to describe the component"/>
+    <aura:attribute name="labelAcceptedStatus" type="String" default="Accepted or Maybe" required="true" description="Label for Accepted Status counter in quick summary of the Attendees info"/>
+    <aura:attribute name="labelNewStatus" type="String" default="No Response" required="true" description="Label for New Status counter in quick summary of the Attendees info"/>
+    <aura:attribute name="labelDeclinedStatus" type="String" default="Declined" required="true" description="Label for Declined Status counter in quick summary of the Attendees info"/>
+    <aura:attribute name="labelOrganizer" type="String" default="Organizer" description="Label for Organizer"/>
+    <aura:attribute name="saveButtonLabel" type="String" default="Save" required="true" description="String value of Save Button label"/>  
+    <aura:attribute name="cancelButtonLabel" type="String" default="Cancel" required="true" description="String value of Cancel Button label"/>
+    <aura:attribute name="placeholder" type="String" description="String value that will appear when no record is selected"/>
+
+    <!-- Messages -->
+    <aura:attribute name="loadingMessage" type="String" default="Loading..." description="String value that will appear when the component is initializing"/>
+    <aura:attribute name="searchingMessage" type="String" default="Searching..." description="String value that will appear when the component is searching"/>
+    <aura:attribute name="noResultsMessage" type="String" default="No results found for {0}" description="String value that will appear when the component finds 0 results"/>
+    <aura:attribute name="errorMessage" type="String" description="String value displayed when the input is in an error state"/>
+
+    <!-- Query -->
+    <aura:attribute name="filter" type="String" description="String value that determines how the SOQL search will be filtered"/>
+    <aura:attribute name="limit" type="Integer" required="true" default="10" description="Integer value that determines how many records are returned in the SOQL search for one object type" access="private"/>
+
+    <!-- Additional CSS class -->
+    <aura:attribute name="class" type="String" description="A CSS class that will be applied to the outer element. This style is in addition to base classes associated with the component"/>
+
+
+    <!-- Methods -->
+    <aura:method name="showError" action="{!c.showError}" description="A method which triggers the error state">
+        <aura:attribute name="errorMessage" type="String"/>
+    </aura:method>
+    <aura:method name="hideError" action="{!c.hideError}" description="A method which removes the error state"/>
+
+    <!-- Internal -->
+    <aura:attribute name="idNumber" type="Integer" description="Random id assigned to pair labels with inputs" access="private"/>
+    <aura:attribute name="initCallsRunning" type="Integer" default="{!1}" description="Integer value that determines how many calls are running during init" access="private"/>
+    <aura:attribute name="lastSearchTerm" type="String" description="String value that holds the last searched term" access="private"/>
+    <aura:attribute name="openMenu" type="Boolean" default="{!false}" description="Determines whether the menu is open" access="private"/>
+    <aura:attribute name="objectLabel" type="String" description="String value that holds the label of the object" access="private"/>
+    <aura:attribute name="searching" type="Boolean" description="Boolean value marked when searching" access="private"/>
+    <aura:attribute name="searchTimeout" type="Object" description="Object that holds the search Timeout" access="private"/>
+    <aura:attribute name="valueLabel" type="String" description="String value that holds the searchField of the selected record" access="private"/>
+    <aura:attribute name="isMobile" type="Boolean" default="{!false}" description="Determines if the user is in Salesforce1" access="private"/>
+
+    <aura:attribute name="focusIndex" type="Integer" description="Integer value that determines which record is focused" access="private"/>
+    <aura:attribute name="selectedRecordsIds" type="String" description="String value that holds the Ids of the selected records" access="private"/>
+    <aura:attribute name="records" type="Object[]" description="List of records returned from the SOQL search" access="private"/>
+    <aura:attribute name="selectedOptionTiles" type="Object[]" description="List of selected records" access="private"/>
+    <aura:attribute name="iNewStatusCount" type="Integer" default="" description="Count of Invitees in state New" access="private"/>
+    <aura:attribute name="iAcceptedStatusCount" type="Integer" default="" description="Count of Invitees in state Accepted" access="private"/>
+    <aura:attribute name="iDeclinedStatusCount" type="Integer" default="" description="Count of Invitees in state New" access="private"/>
+
+    <!-- Event registration and handlers -->
+    <aura:handler name="init" value="{!this}" action="{!c.onInit}"/>
+    <aura:handler name="change" value="{!v.focusIndex}" action="{!c.handleFocusIndexChange}"/>
+    <aura:handler name="change" value="{!v.filter}" action="{!c.handleFilterChange}"/>
+    <aura:handler name="strike_evt_componentDestroyed" event="c:strike_evt" action="{!c.handleComponentDestroyed}" includeFacets="true" description="handles when a StrikeOption is deleted"/>
+    <aura:handler event="force:refreshView" action="{!c.onInit}"/>
+
+    <!-- Buttons -->
+    <div class="{!if(v.componentReadOnly||not(v.componentHasChanges), ' slds-hide', ' slds-align_absolute-center')}">
+        <lightning:button label="{!v.cancelButtonLabel}" onclick="{!c.onInit}" disabled="{!not(v.componentHasChanges)}"/>
+        <lightning:button variant="brand" label="{!v.saveButtonLabel}" onclick="{!c.handleSaveChanges}" disabled="{!not(v.componentHasChanges)}"/>
+    </div>
+
+    <!-- Lookup -->
+    <ui:scrollerWrapper aura:id="lookup" class="{!'slds-form-element slds-lookup slds-is-open ' + if(v.error, 'slds-has-error ', '') + if(v.isMobile, 'sl-lookup--mobile ', '') + v.class}">
+        <label class="slds-form-element__label" for="{!'strike-lookup-' + v.idNumber}">
+            <aura:if isTrue="{!v.required}">
+                <abbr class="slds-required" title="required">*</abbr>
+            </aura:if>
+            {!v.label}  
+        </label>
+        <div class="{!'slds-form-element__control slds-input-has-icon slds-input-has-icon--right' + if(v.disabled, ' slds-hide', '')}" onclick="{!c.cancelLookup}">
+            <div class="{!'slds-pill_container' + if(greaterthan(v.initCallsRunning, 0), '', ' slds-hide')}">
+                <span class="slds-pill slds-size--1-of-1 sl-pill--loading">
+                    <span class="slds-pill__label sl-pill__label" title="{!v.loadingMessage}">{!v.loadingMessage}</span>
+                </span>
+            </div>
+            <div class="{!'sl-lookup__input_container slds-grid slds-grid--pull-padded-xx-small' + if(equals(v.initCallsRunning, 0), '', ' slds-hide')}">
+                <div class="sl-lookup__input slds-col slds-p-horizontal--xx-small">
+                    <lightning:icon iconName="utility:search" size="x-small" class="sl-search-icon"/>
+                    <input
+                        aura:id="lookupInput"
+                        id="{!'strike-lookup-' + v.idNumber}"
+                        name="{!'input-' + v.idNumber}"
+                        class="slds-lookup__search-input slds-input js-template-lookup"
+                        type="text"
+                        aria-autocomplete="list"
+                        role="combobox"
+                        aria-expanded="false"
+                        placeholder="{!v.placeholder}"
+                        onclick="{!c.handleInputClick}"
+                        onfocus="{!c.handleInputFocus}"
+                        onkeydown="{!c.handleInputKeyDown}"
+                        onkeyup="{!c.handleInputKeyUp}"
+                        onkeypress="{!c.handleInputKeyPress}"
+                        disabled='{!v.disabled}'/>
+                </div>
+                <aura:if isTrue="{!v.isMobile}">
+                    <div class="sl-lookup--mobile__cancel slds-col slds-no-flex slds-p-horizontal--xx-small">
+                        <button class="slds-button slds-button--neutral" onclick="{!c.cancelLookup}">Cancel</button>
+                    </div>
+                </aura:if>
+            </div>
+            <div class="{!if(v.searching, 'slds-lookup__menu', 'slds-hide')}" role="listbox" onclick="{!c.handleSearchingClick}">
+                <ul class="slds-lookup__list" role="listbox">
+                    <li role="presentation">
+                        <span class="slds-lookup__item-action slds-media sl-searching" role="option">
+                            <div class="slds-media__body">
+                                <div class="slds-lookup__result-text">{!v.searchingMessage}</div>
+                            </div>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+            <div class="{!if(and(v.searching == false, v.openMenu), 'slds-lookup__menu', 'slds-hide')}" role="listbox">
+                <div class="{!if(or(v.records == null, v.records.length == 0), '', 'slds-hide')}">
+                    <ul class="slds-lookup__list" role="listbox">
+                        <li role="presentation">
+                            <span class="slds-lookup__item-action slds-media sl-no-results" role="option">
+                                <div class="slds-media__body">
+                                    <div class="slds-lookup__result-text">
+                                        {!format(v.noResultsMessage, '"' + v.lastSearchTerm + '"')}
+                                    </div>
+                                </div>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+                <ul aura:id="lookupMenu" class="{!if(v.searching, 'slds-hide', 'slds-lookup__list')}" role="listbox">
+                    <aura:iteration items="{!v.records}" var="record" indexVar="index">
+                        <li role="presentation" class="{!if(index == v.focusIndex, 'slds-has-focus', '')}" data-index="{!index}" onclick="{!c.handleRecordClick}">
+                            <span class="slds-lookup__item-action slds-media" role="option">
+                               <lightning:icon class="slds-media__figure" iconName="{!if(equals(record.type,'User'),v.iconUser, if(equals(record.type,'Contact'), v.iconContact,v.iconLead))}" size="small"/>
+                                <div class="slds-media__body">
+                                    <div class="slds-lookup__result-text">{!record.label}</div>
+                                    <span class="{!'slds-lookup__result-meta slds-text-body--small' + if(empty(record.sublabel, ' slds-hide', ''))}">{!record.sublabel}</span>
+                                </div>
+                            </span>
+                        </li>
+                    </aura:iteration>
+                </ul>
+            </div>
+        </div>
+        <div class="{!if(v.componentHasChanges, ' slds-hide', ' ')}">
+            <label class="slds-form-element__label">
+                {!v.labelAcceptedStatus}: {!v.iAcceptedStatusCount}, {!v.labelDeclinedStatus}: {!v.iDeclinedStatusCount}, {!v.labelNewStatus}: {!v.iNewStatusCount}
+            </label>
+        </div> 
+        <!-- TODO: Show here a link on Parent Event when viewing Child Event  https://cleververve.atlassian.net/browse/IN-15 -->
+        <aura:if isTrue="{!not(empty(v.selectedOptionTiles))}">
+            <ul class="slds-has-dividers--bottom-space slds-m-top--small">
+                <aura:iteration items="{!v.selectedOptionTiles}" var="option">
+                    <li class="slds-item">
+                        <!--TODO: https://cleververve.atlassian.net/browse/IN-16 -->
+                        <c:strike_tile aura:id="tiles" destroyable="{!if(option.readonly||v.componentReadOnly, false, true)}" value="{!option.recordId}" title="{!option.title}" subtitle="{!option.subtitle}" iconName="{!if(equals(option.type,'User'),v.iconUser, if(equals(option.type,'Contact'), v.iconContact,v.iconLead))}" variant="icon" link="{!'/'+option.recordId}" statusIconName="{!if(equals(option.status,'New'),v.iconQuestion, if(equals(option.status,'Declined'), v.iconCross, if(equals(option.status,'Accepted'), v.iconCheckmark, v.iconQuestion)))}" statusIconClass="{!if(equals(option.status,'New'), 'icn-gray', if(equals(option.status,'Declined'), 'icn-red', if(equals(option.status,'Accepted'), 'icn-green', 'icn-gray')))}" hoverinfo="{!option.hoverinfo}"/>
+                    </li>
+                </aura:iteration>
+            </ul>
+        </aura:if>    
+        <aura:if isTrue="{!and(v.error, not(empty(v.errorMessage)))}">
+            <div class="slds-form-element__help">{!v.errorMessage}</div>
+        </aura:if>
+    </ui:scrollerWrapper>
+</aura:component>
+<!--
+Copyright 2017 Appiphony, LLC
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following 
+disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following 
+disclaimer in the documentation and/or other materials provided with the distribution.
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote 
+products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->

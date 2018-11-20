@@ -1,0 +1,13 @@
+<design:component label="Event Attendees">
+    
+    <design:attribute label="Search in Leads"
+                      name="searchInLeads"
+                      default="true"
+                      description="Determines whether search should be performed in Leads"/>
+    
+    <design:attribute label="Search in Contacts"
+                      name="searchInContacts"
+                      default="true"
+                      description="Determines whether search should be performed in Contacts"/>
+	
+</design:component>

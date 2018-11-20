@@ -1,0 +1,25 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" access="global" >
+    <aura:attribute name="recordId" type="Id"/>
+    <aura:attribute name="searchInLeads" type="Boolean" default="{!true}" access="global"/>
+    <aura:attribute name="searchInContacts" type="Boolean" default="{!true}" access="global"/>
+    
+    <div class="slds-card">
+        <div class="slds-p-around_medium">
+            <c:attendees_multiLookup label="{!$Label.c.Attendees_Label}"
+            labelOrganizer="{!$Label.c.Attendees_Event_Organizer}"
+            placeholder="{!$Label.c.Attendees_Placeholder}"
+            loadingMessage="{!$Label.c.Attendees_Loading_Message}"
+            errorMessage="{!$Label.c.Attendees_Error_Message}"
+            labelAcceptedStatus="{!$Label.c.Attendees_Label_Accepted_Status}"
+            labelNewStatus="{!$Label.c.Attendees_Label_New_Status}"
+            labelDeclinedStatus="{!$Label.c.Attendees_Label_Declined_Status}"
+            saveButtonLabel="{!$Label.c.Attendees_Label_Save_Button}"
+            cancelButtonLabel="{!$Label.c.Attendees_Label_Cancel_Button}"
+            eventId="{!v.recordId}"
+            searchInLeads="{!v.searchInLeads}"
+            searchInContacts="{!v.searchInContacts}"
+            />
+        </div>
+    </div>
+	
+</aura:component>
