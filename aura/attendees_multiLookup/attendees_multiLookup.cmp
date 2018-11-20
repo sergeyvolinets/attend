@@ -9,7 +9,8 @@ License: BSD 3-Clause License
 <aura:component controller="attendees_lookupController" access="global">
     <!-- Event Param -->
     <aura:attribute name="eventId" type="String" required="true" description="Parent Event Id"/>
-
+    <!-- SEV: IN-15 -->
+    <aura:attribute name="parEventRef" type="String" required="true" description="Parent Event URL or null if there is no parent"/>
     <!-- Standard LEX Icons -->
     <aura:attribute name="iconUser" type="String" default="standard:user" description="String value that determines the icon name or path" access="private"/>
     <aura:attribute name="iconContact" type="String" default="standard:contact" description="String value that determines the icon name or path" access="private"/>
@@ -171,11 +172,20 @@ License: BSD 3-Clause License
                 </ul>
             </div>
         </div>
+        
         <div class="{!if(v.componentHasChanges, ' slds-hide', ' ')}">
             <label class="slds-form-element__label">
                 {!v.labelAcceptedStatus}: {!v.iAcceptedStatusCount}, {!v.labelDeclinedStatus}: {!v.iDeclinedStatusCount}, {!v.labelNewStatus}: {!v.iNewStatusCount}
             </label>
+        </div>
+        <div >
+            <aura:if isTrue="{!not(empty(v.parEventRef))}">
+                <label class="slds-form-element__label">
+                    <a href="{!v.parEventRef}">View parent event</a>
+                </label>
+            </aura:if>
         </div> 
+        
         <!-- TODO: Show here a link on Parent Event when viewing Child Event  https://cleververve.atlassian.net/browse/IN-15 -->
         <aura:if isTrue="{!not(empty(v.selectedOptionTiles))}">
             <ul class="slds-has-dividers--bottom-space slds-m-top--small">

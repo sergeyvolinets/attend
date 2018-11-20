@@ -316,7 +316,7 @@ License: BSD 3-Clause License
         action.setParams({
             sEventId: component.get('v.eventId')
         });
-        
+		component.set("v.parEventRef",''); //SEV: IN-15    
         action.setCallback(this, function(res){
             if (res.getState() === 'SUCCESS') {
                 var sParentEvent = res.getReturnValue();
@@ -329,6 +329,7 @@ License: BSD 3-Clause License
                         component.set("v.componentReadOnly", true);
                         component.set("v.disabled", true);
                         component.set("v.eventId", sParentEvent);
+                        component.set("v.parEventRef", '/'+sParentEvent); //SEV: IN-15
                     }
                 }
                 helper.getInitialInvitees(component, event, helper);
