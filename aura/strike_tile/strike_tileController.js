@@ -6,11 +6,17 @@ Website: http://www.lightningstrike.io
 GitHub: https://github.com/appiphony/Strike-Components
 License: BSD 3-Clause License
 */
-({
-    destroyTile: function (component, event, helper) {
-    	// Check to see if this component is in Strike Fiddler so we stop user from removing it
+({ 
+    destroyTile: function (component, event, helper) 
+    {
+        // Check to see if this component is in Strike Fiddler so we stop user from removing it
     	var isNotStrikeDemo = component.getElement().parentElement.classList[0] !== 'strikeDemoOnly';
-        if (component.get('v.destroyable') && isNotStrikeDemo) {
+        if(component.get('v.destroyableAttendees') == false)
+        {
+            alert('To remove this previously added Attendee, do so from the Outlook calendar version of this event');//IC-16            
+        }   
+        else if (component.get('v.destroyable') && isNotStrikeDemo) 
+        {
             helper.notifyParent(component);
             helper.destroyComponent(component);
         }

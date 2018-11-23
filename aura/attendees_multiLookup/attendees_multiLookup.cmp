@@ -192,8 +192,24 @@ License: BSD 3-Clause License
                 <aura:iteration items="{!v.selectedOptionTiles}" var="option">
                     <li class="slds-item">
                         <!--TODO: https://cleververve.atlassian.net/browse/IN-16 -->
-                        <c:strike_tile aura:id="tiles" destroyable="{!if(option.readonly||v.componentReadOnly, false, true)}" value="{!option.recordId}" title="{!option.title}" subtitle="{!option.subtitle}" iconName="{!if(equals(option.type,'User'),v.iconUser, if(equals(option.type,'Contact'), v.iconContact,v.iconLead))}" variant="icon" link="{!'/'+option.recordId}" statusIconName="{!if(equals(option.status,'New'),v.iconQuestion, if(equals(option.status,'Declined'), v.iconCross, if(equals(option.status,'Accepted'), v.iconCheckmark, v.iconQuestion)))}" statusIconClass="{!if(equals(option.status,'New'), 'icn-gray', if(equals(option.status,'Declined'), 'icn-red', if(equals(option.status,'Accepted'), 'icn-green', 'icn-gray')))}" hoverinfo="{!option.hoverinfo}"/>
-                    </li>
+                       <c:strike_tile 
+                                      aura:id="tiles" 
+                                      destroyable="{!if(option.readonly||v.componentReadOnly, false, true)}" 
+                                      destroyableAttendees="{!if(equals(option.relId,null), true, false)}" 
+
+
+                                      value="{!option.recordId}" 
+                                      title="{!option.title}" 
+                                      subtitle="{!option.subtitle}" 
+                                      iconName="{!if(equals(option.type,'User'),v.iconUser, if(equals(option.type,'Contact'), v.iconContact,v.iconLead))}" 
+                                      variant="icon" link="{!'/'+option.recordId}" 
+                                      statusIconName="{!if(equals(option.status,'New'),v.iconQuestion, if(equals(option.status,'Declined'), v.iconCross, if(equals(option.status,'Accepted'), v.iconCheckmark, v.iconQuestion)))}" 
+                                      statusIconClass="{!if(equals(option.status,'New'), 'icn-gray', if(equals(option.status,'Declined'), 'icn-red', if(equals(option.status,'Accepted'), 'icn-green', 'icn-gray')))}" 
+                                      hoverinfo="{!option.hoverinfo}"/>
+                        
+                        
+<!--                        <c:strike_tile aura:id="tiles" destroyable="{!if(option.readonly||v.componentReadOnly, false, true)}" value="{!option.recordId}" title="{!option.title}" subtitle="{!option.subtitle}" iconName="{!if(equals(option.type,'User'),v.iconUser, if(equals(option.type,'Contact'), v.iconContact,v.iconLead))}" variant="icon" link="{!'/'+option.recordId}" statusIconName="{!if(equals(option.status,'New'),v.iconQuestion, if(equals(option.status,'Declined'), v.iconCross, if(equals(option.status,'Accepted'), v.iconCheckmark, v.iconQuestion)))}" statusIconClass="{!if(equals(option.status,'New'), 'icn-gray', if(equals(option.status,'Declined'), 'icn-red', if(equals(option.status,'Accepted'), 'icn-green', 'icn-gray')))}" hoverinfo="{!option.hoverinfo}"/>
+-->                    </li>
                 </aura:iteration>
             </ul>
         </aura:if>    

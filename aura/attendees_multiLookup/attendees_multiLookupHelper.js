@@ -59,7 +59,8 @@ License: BSD 3-Clause License
                             recordId: record.recordId,
                             status: record.status,
                             type: record.type,
-                            readonly: record.readonly
+                            readonly: record.readonly,
+                            relId : record.eventRelationId //IC-16
                         }
 
                         tiles.push(tile);
@@ -129,10 +130,10 @@ License: BSD 3-Clause License
                                 recordId: record.recordId,
                                 status: record.status,
                                 type: record.type,
-                                readonly: record.readonly
+                                readonly: record.readonly,
+                                relId : record.eventRelationId //IC-16
                             });
                         });
-
                         helper.setRecords(component, event, helper, returnedRecords);
                     }
                 } else {
